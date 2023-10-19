@@ -80,6 +80,11 @@ public class LibraryCard {
         return borrowed;
     }
 
+    // method to add/issue valid book to borrowed arraylist
+    public void addBook(Book book) {
+        this.borrowed.add(book);
+    }
+
     /**
      * Issue a new book
      * 
@@ -89,32 +94,51 @@ public class LibraryCard {
 
     public boolean issueBook(Book book) {
         int numbooks = getBooks().size();
-        boolean book_borrowed = borrowed.contains(book);
 
-        if (numbooks <= 4) {
-            if (!book_borrowed) {
-                return true;
+        if (numbooks < 4) {
+            if (!bookBorrowedAlready(book)) {
+                if (cardExpired()) {
+                    if (bookAvailable(book)) {
+                        if (noPendingFine()) {
+                            // issue the book
+                            addBook(book);
+                            // call method to set return days
+                            bookReturnDays(book);
+                            return true;
+                        }
+                    }
+                }
             }
-
         }
         return false;
-
     }
 
-    private boolean isBookAlreadyBorrowed(Book book) {
+    // method to check if book has been borrowed already
+    private boolean bookBorrowedAlready(Book book) {
         return borrowed.contains(book);
     }
 
-    private boolean isCardStillValid() {
+    // method to check if expiration date has passed current date
+    private boolean cardExpired() {
         Date currentDate = new Date();
         return ExpiryDate.after(currentDate);
     }
 
-    private boolean isBookAvailableForBorrowing(Book book) {
-        // Implement logic to check book availability
-        return true; // Placeholder, update as needed
+    // is book available to borrow (check status)
+    private boolean bookAvailable(Book book) {
+        return book.getStatus();
     }
 
+    private static void bookReturnDays(Book book) {
+        // sets return days according to book demand
+        if (book.getDemand() == 0) {
+            book.setDays(15);
+        } else if (book.getDemand() == 1) {
+            book.setDays(3);
+        }
+    }
+
+    // method returns false if any number other than 0.0 indicating a fine
     private boolean noPendingFine() {
         return fine == 0.0;
     }
