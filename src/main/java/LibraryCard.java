@@ -90,13 +90,16 @@ public class LibraryCard {
      * 
      * @param Book: book to borrow
      * @return true if the book is successfully borrowed, false otherwise
+     * @throws IllegalBookIssueException
      */
 
-    public boolean issueBook(Book book) {
+    public boolean issueBook(Book book) throws IllegalBookIssueException {
         int numbooks = getBooks().size();
 
         if (numbooks < 4) {
-            if (!bookBorrowedAlready(book)) {
+            if (bookBorrowedAlready(book)) {
+                throw new IllegalBookIssueException("Book has already been issued");
+            } else {
                 if (cardExpired()) {
                     if (bookAvailable(book)) {
                         if (noPendingFine()) {
@@ -114,14 +117,26 @@ public class LibraryCard {
     }
 
     // method to check if book has been borrowed already
+    // private boolean bookBorrowedAlready(Book book) throws
+    // IllegalBookIssueException {
+    // if (borrowed.contains(book)) {
+    // throw new IllegalBookIssueException("Book is already issued");
+    // }
+    // return true;
+    // }
+
     private boolean bookBorrowedAlready(Book book) {
         return borrowed.contains(book);
     }
 
     // method to check if expiration date has passed current date
-    private boolean cardExpired() {
+    private boolean cardExpired() throws IllegalBookIssueException {
         Date currentDate = new Date();
-        return ExpiryDate.after(currentDate);
+        if (ExpiryDate.after(currentDate)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // is book available to borrow (check status)
